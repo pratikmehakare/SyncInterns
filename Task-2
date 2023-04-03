@@ -1,0 +1,98 @@
+
+//jsp file
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<form action="b" method="post">
+  <label for="name">Name:</label>
+  <input type="text" name="name" id="name">
+  <br>
+  <label for="age">Age:</label>
+  <input type="number" name="age" id="age">
+  <br>
+  <label for="gender">Gender:</label>
+  <select name="gender" id="gender">
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+  </select>
+  <br>
+  <label for="feedback">Feedback:</label>
+  <textarea name="feedback" id="feedback"></textarea>
+  <br>
+  <input type="submit" value="Submit">
+</form>
+
+
+</body>
+</html>
+
+
+//servlet file
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class b extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Get survey data from request parameters
+        String name = request.getParameter("name");
+        int age = Integer.parseInt(request.getParameter("age"));
+        String gender = request.getParameter("gender");
+        String feedback = request.getParameter("feedback");
+
+        // Store survey data in database
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection("\"jdbc:mysql://localhost/survey?user=root&password=mysql\"");
+            PreparedStatement ps = con.prepareStatement("INSERT INTO responses (name, age, gender, feedback) VALUES (?, ?, ?, ?)");
+            ps.setString(1, name);
+            ps.setInt(2, age);
+            ps.setString(3, gender);
+            ps.setString(4, feedback);
+            ps.executeUpdate();
+            con.close();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Redirect to thank you page
+        response.sendRedirect("thankyou.jsp");
+    }
+}
+
+
+
+
+//thankyou servlet
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h1>Thank you for completing the survey!</h1>
+<p>Your responses have been recorded.</p>
+
+
+</body>
+</html>
